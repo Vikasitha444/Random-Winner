@@ -1,0 +1,16 @@
+
+
+.topicBox{
+    background-color: rgba(228, 137, 137, 0.589);
+    width: 80%;
+    height: 100px;
+    border-radius: 10px;
+    
+}
+
+
+.text{
+    font-size: 50px;
+    font-weight: 100;
+    margin-left: 200px;
+}
