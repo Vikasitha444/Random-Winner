@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #111;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-container {
+            background: rgba(255, 0, 0, 0.1);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .logo-img {
+            width: 60px;
+            height: auto;
+        }
+
+        .header-text {
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .total-count {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .draw-button {
+            background: linear-gradient(135deg, #ff1a1a, #cc0000);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .draw-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ff3333, #e60000);
+        }
+
+        .participants-table {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Define specific widths for each column */
+        table th:nth-child(1),
+        table td:nth-child(1) {
+            width: 33%;
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        table th:nth-child(2),
+        table td:nth-child(2) {
+            width: 33%;
+            text-align: left;
+        }
+
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            width: 34%;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 14px;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 15px 20px;
+            color: #ddd;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .new-entry {
+            animation: highlight 2s ease-out;
+        }
+
+        @keyframes highlight {
+            0% { background: rgba(255, 0, 0, 0.15); }
+            100% { background: transparent; }
+        }
+
+        .empty-state {
+            padding: 30px;
+            text-align: center;
+            color: #888;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <div class="logo-container">
+                    <img src="logo.jpg" alt="31CREW Professional" class="logo-img">
+                </div>
+                <div class="header-text">
+                    <h1>ලියාපදිංචි වූ සහභාගිවන්නන්</h1>
+                    <p class="total-count">මුළු සහභාගිවන්නන්: <span id="participantCount">0</span></p>
+                </div>
+            </div>
+            <button class="draw-button" onclick="window.location.href='raffel.html'">දිනුම් ඇදීම</button>
+        </div>
+        
+        <div class="participants-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>නම</th>
+                        <th>WHATSAPP අංකය</th>
+                        <th>වේලාව</th>
+                    </tr>
+                </thead>
+                <tbody id="participantsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4lsGIG6N0vAKw8swEOp__cPgUwkYpFnU",
+            authDomain: "raffle-draw-952ae.firebaseapp.com",
+            databaseURL: "https://raffle-draw-952ae-default-rtdb.firebaseio.com",
+            projectId: "raffle-draw-952ae",
+            storageBucket: "raffle-draw-952ae.firebasestorage.app",
+            messagingSenderId: "449303202116",
+            appId: "1:449303202116:web:a472352d42a31743edef11",
+            measurementId: "G-GGRLTKS5JW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const participantsRef = ref(db, 'participants');
+        
+        onValue(participantsRef, (snapshot) => {
+            const tableBody = document.getElementById('participantsTableBody');
+            const data = snapshot.val();
+            
+            if (!data) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="empty-state">සහභාගිවන්නන් නැත</td></tr>';
+                document.getElementById('participantCount').textContent = '0';
+                return;
+            }
+
+            const entries = Object.entries(data).map(([key, value]) => ({
+                id: key,
+                ...value
+            })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Update count
+            document.getElementById('participantCount').textContent = entries.length;
+            
+            tableBody.innerHTML = entries.map(entry => `
+                <tr>
+                    <td>${entry.name}</td>
+                    <td>${entry.whatsapp}</td>
+                    <td>${new Date(entry.timestamp).toLocaleString('si-LK')}</td>
+                </tr>
+            `).join('');
+
+            // Add highlight effect to new entry
+            const firstRow = tableBody.querySelector('tr');
+            if (firstRow) {
+                firstRow.classList.add('new-entry');
+                setTimeout(() => firstRow.classList.remove('new-entry'), 2000);
+            }
+        });
+    </script>
+</body>
+</html>

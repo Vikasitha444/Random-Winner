@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>දිනුම් ඇදීම</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(120deg, #000000, #1a1a1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo-img {
+            width: 150px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(255, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .draw-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .draw-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #000, #ff0000, #000);
+            animation: borderGlow 2s infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .number-display {
+            font-size: 64px;
+            font-weight: bold;
+            height: 100px;
+            margin: 30px 0;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 15px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .winner-name {
+            font-size: 36px;
+            margin: 30px 0;
+            opacity: 0;
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 15px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .draw-button {
+            background: linear-gradient(45deg, #ff1a1a, #cc0000);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+        }
+
+        .draw-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ff3333, #e60000);
+        }
+
+        .draw-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .number-animation {
+            animation: numberRoll 0.05s linear infinite;
+        }
+
+        @keyframes numberRoll {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(20px); opacity: 1; }
+        }
+
+        .winner-reveal {
+            animation: revealWinner 1s ease-out forwards;
+        }
+
+        @keyframes revealWinner {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            100% { text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="31CREW Professional" class="logo-img">
+        </div>
+        <div class="draw-box">
+            <h1>දිනුම් ඇදීම</h1>
+            <div class="number-display">0000000000</div>
+            <div class="winner-name"></div>
+            <button class="draw-button">දිනුම් අදින්න</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4lsGIG6N0vAKw8swEOp__cPgUwkYpFnU",
+            authDomain: "raffle-draw-952ae.firebaseapp.com",
+            databaseURL: "https://raffle-draw-952ae-default-rtdb.firebaseio.com",
+            projectId: "raffle-draw-952ae",
+            storageBucket: "raffle-draw-952ae.firebasestorage.app",
+            messagingSenderId: "449303202116",
+            appId: "1:449303202116:web:a472352d42a31743edef11",
+            measurementId: "G-GGRLTKS5JW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const numberDisplay = document.querySelector('.number-display');
+        const winnerName = document.querySelector('.winner-name');
+        const drawButton = document.querySelector('.draw-button');
+
+        function createConfetti() {
+            const colors = ['#ff0000', '#fff', '#ff3333', '#cc0000'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animation = `confettiFall ${1 + Math.random() * 2}s linear forwards`;
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        async function animateNumber() {
+            const snapshot = await get(ref(db, 'participants'));
+            const participants = [];
+            
+            snapshot.forEach((childSnapshot) => {
+                participants.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
+            });
+
+            if (participants.length === 0) {
+                alert('සහභාගිවන්නන් නැත!');
+                return;
+            }
+
+            let duration = 3000;
+            let startTime = null;
+            
+            function update(currentTime) {
+                if (!startTime) startTime = currentTime;
+                const elapsed = currentTime - startTime;
+                
+                if (elapsed < duration) {
+                    // Show random phone numbers during animation
+                    const randomParticipant = participants[Math.floor(Math.random() * participants.length)];
+                    numberDisplay.textContent = randomParticipant.whatsapp;
+                    requestAnimationFrame(update);
+                } else {
+                    // Show final winner
+                    const winner = participants[Math.floor(Math.random() * participants.length)];
+                    numberDisplay.textContent = winner.whatsapp;
+                    winnerName.textContent = '🎉 ' + winner.name + ' 🎉';
+                    winnerName.classList.add('winner-reveal');
+                    createConfetti();
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        drawButton.addEventListener('click', () => {
+            winnerName.classList.remove('winner-reveal');
+            winnerName.textContent = '';
+            numberDisplay.classList.add('number-animation');
+            drawButton.disabled = true;
+            
+            animateNumber();
+            
+            setTimeout(() => {
+                numberDisplay.classList.remove('number-animation');
+                drawButton.disabled = false;
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
