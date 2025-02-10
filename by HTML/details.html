@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>දිනුම් ඇදීම් ලියාපදිංචි කිරීම</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(120deg, #000000, #1a1a1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #000, #ff0000, #000);
+            animation: borderGlow 2s infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .logo-img {
+            width: 130px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(255, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f8f8;
+        }
+
+        input:focus {
+            border-color: #000;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+
+        button {
+            background: linear-gradient(45deg, #000000, #333333);
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(45deg, #1a1a1a, #4d4d4d);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .popup.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .popup img {
+            width: 80px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .popup h2 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .popup p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="logo.jpg" alt="31CREW Professional" class="logo-img">
+        </div>
+        <h1>දිනුම් ඇදීම් ලියාපදිංචි කිරීම</h1>
+        <form id="raffleForm">
+            <div class="form-group">
+                <label for="name">නම:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp අංකය:</label>
+                <input type="tel" id="whatsapp" name="whatsapp" pattern="[0-9]{10}" placeholder="0712345678" required>
+            </div>
+            <button type="submit">ලියාපදිංචි කරන්න</button>
+        </form>
+    </div>
+
+    <div class="overlay"></div>
+    <div class="popup">
+        <img src="logo.jpg" alt="31CREW Professional">
+        <h2>ලියාපදිංචිය සාර්ථකයි!</h2>
+        <p>ඔබගේ තොරතුරු සාර්ථකව ලියාපදිංචි කර ඇත</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4lsGIG6N0vAKw8swEOp__cPgUwkYpFnU",
+            authDomain: "raffle-draw-952ae.firebaseapp.com",
+            databaseURL: "https://raffle-draw-952ae-default-rtdb.firebaseio.com",
+            projectId: "raffle-draw-952ae",
+            storageBucket: "raffle-draw-952ae.firebasestorage.app",
+            messagingSenderId: "449303202116",
+            appId: "1:449303202116:web:a472352d42a31743edef11",
+            measurementId: "G-GGRLTKS5JW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('raffleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const timestamp = new Date().toISOString();
+
+            const participantsRef = ref(db, 'participants');
+            const snapshot = await get(participantsRef);
+            const data = snapshot.val();
+            
+            if (data) {
+                const exists = Object.values(data).some(participant => 
+                    participant.whatsapp === whatsapp
+                );
+                
+                if (exists) {
+                    alert('මෙම WhatsApp අංකය දැනටමත් ලියාපදිංචි කර ඇත!');
+                    return;
+                }
+            }
+
+            try {
+                await push(ref(db, 'participants'), {
+                    name,
+                    whatsapp,
+                    timestamp
+                });
+
+                const overlay = document.querySelector('.overlay');
+                const popup = document.querySelector('.popup');
+                
+                overlay.style.display = 'block';
+                popup.style.display = 'block';
+                
+                setTimeout(() => {
+                    overlay.classList.add('show');
+                    popup.classList.add('show');
+                }, 10);
+
+                document.getElementById('raffleForm').reset();
+
+            } catch (error) {
+                console.error("Error saving data: ", error);
+                alert('දත්ත සුරැකීමේ දෝෂයකි. නැවත උත්සාහ කරන්න.');
+            }
+        });
+    </script>
+</body>
+</html>
